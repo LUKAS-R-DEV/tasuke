@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: tasuke
+
+  # Configuração do Banco de Dados
+  datasource:
+    url: jdbc:postgresql://localhost:5432/tasuke
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  # Configuração do JPA / Hibernate
+  jpa:
+    hibernate:
+      ddl-auto: validate # Deixe 'validate' para o Flyway controlar a criação do schema
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+  # Configuração do Flyway
+  flyway:
+    enabled: true
+    locations: classpath:db/migration # Pasta onde ficam suas migrations (ex: V1__create_table_users.sql)
+
+# Configuração do Spring Boot Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health"
+  endpoint:
+    health:
+      show-details: always # Exibe detalhes da saúde da aplicação e do banco
+server:
+  port: 8080
