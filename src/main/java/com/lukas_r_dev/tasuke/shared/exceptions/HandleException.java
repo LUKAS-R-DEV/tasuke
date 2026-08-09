@@ -2,6 +2,8 @@ package com.lukas_r_dev.tasuke.shared.exceptions;
 
 import com.lukas_r_dev.tasuke.shared.response.ApiResponseError;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -68,6 +70,16 @@ public class HandleException {
                 .build();
         return apiResponseError;
    }
+   @ExceptionHandler(AuthorizationDeniedException.class)
+   @ResponseStatus(HttpStatus.FORBIDDEN)
+   public ApiResponseError authorizationDeniedException(AuthorizationDeniedException ex){
+        return ApiResponseError.builder()
+                .statusCode(HttpStatus.FORBIDDEN.value())
+                .message("Acesso negado")
+                .timestamp(Instant.now())
+                .build();
+   }
+   
    @ExceptionHandler(Exception.class)
    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiResponseError globalException(Exception ex){

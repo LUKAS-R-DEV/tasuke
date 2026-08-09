@@ -9,7 +9,6 @@ spring:
     password: postgres
     driver-class-name: org.postgresql.Driver
 
-  # Configuração do JPA / Hibernate
   jpa:
     hibernate:
       ddl-auto: validate # Deixe 'validate' para o Flyway controlar a criação do schema
@@ -33,5 +32,11 @@ management:
   endpoint:
     health:
       show-details: always # Exibe detalhes da saúde da aplicação e do banco
+
+security:
+  jwt:
+    secret: Ku+ZmbW3nA8KLsAcCSPa3YDEOLlsUYrxGq5P7x3CtZljTgh5z7qSBkVg9p4OoPZn
+    expiration: 86400000
+
 server:
   port: 8080

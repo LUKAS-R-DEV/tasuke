@@ -9,18 +9,31 @@ import com.lukas_r_dev.tasuke.users.mapper.UserMapper;
 import com.lukas_r_dev.tasuke.users.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     public List<UserResponse> findAll(){
         return userRepository.findAllByActiveTrue().stream().map(userMapper::toUserResponse).toList();
+    }
+
+    public User findByIdActiveTrue(Long id){
+        return userRepository.findByIdAndActiveTrue(id).orElseThrow(()-> new NotFoundException("User not found"));
+    }
+
+    public UserResponse findByEmail(String email){
+       User user = userRepository.findByEmail(email).orElseThrow(()-> new UsernameNotFoundException("user not found"));
+       return userMapper.toUserResponse(user);
     }
 
     public UserResponse findById(Long id){
@@ -33,6 +46,7 @@ public class UserService {
         if(userRepository.existsByEmailIgnoreCase(userRequest.email())){
             throw new ConflictException("Email already exists");
         }
+        user.setPassword(passwordEncoder.encode(userRequest.password()));
         User savedUser = userRepository.save(user);
         return userMapper.toUserResponse(savedUser);
 

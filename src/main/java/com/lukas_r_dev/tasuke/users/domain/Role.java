@@ -1,7 +1,7 @@
 package com.lukas_r_dev.tasuke.users.domain;
 
 public enum Role {
-    ADMIN,
-    AGENT,
-    CUSTOMER
+    ROLE_ADMIN,
+    ROLE_AGENT,
+    ROLE_CUSTOMER
 }
