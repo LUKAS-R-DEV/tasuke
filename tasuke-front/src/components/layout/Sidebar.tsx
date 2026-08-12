@@ -1,5 +1,7 @@
 import { NavLink } from "react-router-dom";
+import type { LucideIcon } from "lucide-react";
 import {
+  BellIcon,
   ChevronsLeftIcon,
   ChevronsRightIcon,
   LayoutDashboardIcon,
@@ -17,13 +19,17 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { initials } from "@/lib/format";
 import { getRoleMeta } from "@/lib/user-meta";
+import type { UserRole } from "@/types/user";
 
-const NAV_ITEMS = [
-  { label: "Dashboard", to: "/dashboard", icon: LayoutDashboardIcon },
-  { label: "Tickets", to: "/tickets", icon: TicketIcon },
-  { label: "Usuários", to: "/users", icon: UsersIcon },
-  { label: "Meu Perfil", to: "/profile", icon: UserIcon },
-  { label: "Configurações", to: "/settings", icon: SettingsIcon },
+const ALL_ROLES: UserRole[] = ["ROLE_ADMIN", "ROLE_AGENT", "ROLE_CUSTOMER"];
+
+const NAV_ITEMS: { label: string; to: string; icon: LucideIcon; roles?: UserRole[] }[] = [
+  { label: "Dashboard", to: "/dashboard", icon: LayoutDashboardIcon, roles: ALL_ROLES },
+  { label: "Tickets", to: "/tickets", icon: TicketIcon, roles: ALL_ROLES },
+  { label: "Notificações", to: "/notifications", icon: BellIcon, roles: ALL_ROLES },
+  { label: "Usuários", to: "/users", icon: UsersIcon, roles: ["ROLE_ADMIN"] },
+  { label: "Meu Perfil", to: "/profile", icon: UserIcon, roles: ALL_ROLES },
+  { label: "Configurações", to: "/settings", icon: SettingsIcon, roles: ALL_ROLES },
 ];
 
 interface SidebarContentProps {
@@ -38,6 +44,10 @@ export function SidebarContent({
   onNavigate,
 }: SidebarContentProps) {
   const { user, logout } = useAuth();
+
+  const visibleItems = NAV_ITEMS.filter(
+    (item) => !item.roles || (!!user?.role && item.roles.includes(user.role as UserRole))
+  );
 
   function handleLogout() {
     logout();
@@ -57,7 +67,7 @@ export function SidebarContent({
 
       {/* Navegação */}
       <nav className="mt-2 flex flex-col gap-1">
-        {NAV_ITEMS.map((item) => {
+        {visibleItems.map((item) => {
           const Icon = item.icon;
           const link = (
             <NavLink

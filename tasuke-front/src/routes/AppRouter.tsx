@@ -1,8 +1,9 @@
-import {BrowserRouter,Route,Routes} from "react-router-dom";
+import {BrowserRouter,Navigate,Route,Routes} from "react-router-dom";
 import AuthLayout from "@/components/layout/AuthLayout.tsx";
 import MainLayout from "@/components/layout/MainLayout.tsx";
 import LoginPage from "@/pages/auth/LoginPage.tsx";
 import Dashboard from "@/pages/dashboard/Dashboard.tsx";
+import Notifications from "@/pages/notifications/Notifications.tsx";
 import Tickets from "@/pages/tickets/Tickets.tsx";
 import TicketDetails from "@/pages/tickets/TicketDetails.tsx";
 import Users from "@/pages/users/Users.tsx";
@@ -22,9 +23,11 @@ export default function AppRouter (){
 
         <Route element={<ProtectedRoute />}>
             <Route element={<MainLayout />}>
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
                 <Route path="/dashboard" element={<Dashboard/>} />
                 <Route path="/tickets" element={<Tickets/>} />
                 <Route path="/tickets/:id" element={<TicketDetails/>} />
+                <Route path="/notifications" element={<Notifications/>} />
                 <Route path="/users" element={<Users/>} />
                 <Route path="/profile" element={<Profile/>} />
                 <Route path="/settings" element={<Settings/>} />

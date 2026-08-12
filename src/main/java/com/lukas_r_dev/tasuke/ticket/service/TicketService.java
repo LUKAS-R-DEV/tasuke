@@ -1,5 +1,7 @@
 package com.lukas_r_dev.tasuke.ticket.service;
 
+import com.lukas_r_dev.tasuke.notification.dtos.NotificationRequest;
+import com.lukas_r_dev.tasuke.notification.service.NotificationService;
 import com.lukas_r_dev.tasuke.shared.exceptions.DomainException;
 import com.lukas_r_dev.tasuke.shared.exceptions.NotFoundException;
 import com.lukas_r_dev.tasuke.ticket.domain.Ticket;
@@ -9,10 +11,11 @@ import com.lukas_r_dev.tasuke.ticket.dtos.TicketResponse;
 import com.lukas_r_dev.tasuke.ticket.mapper.TicketMapper;
 import com.lukas_r_dev.tasuke.ticket.repository.TicketRepository;
 import com.lukas_r_dev.tasuke.users.domain.User;
+import com.lukas_r_dev.tasuke.users.repository.UserRepository;
 import com.lukas_r_dev.tasuke.users.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.BadRequestException;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,6 +26,8 @@ public class TicketService {
     private final TicketRepository ticketRepository;
     private final TicketMapper ticketMapper;
     private final UserService userService;
+    private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public List<TicketResponse> findAll(){
         return ticketRepository.findAll().stream().map(ticketMapper::toTicketResponse).toList();
@@ -31,6 +36,10 @@ public class TicketService {
     public TicketResponse findById(Long id){
         Ticket ticket = ticketRepository.findById(id).orElseThrow(() -> new NotFoundException("Ticket not found"));
         return ticketMapper.toTicketResponse(ticket);
+    }
+
+    public List<TicketResponse> findAllByStatusOpen(){
+        return ticketRepository.findAllByStatus(TicketStatus.OPEN).stream().map(ticketMapper::toTicketResponse).toList();
     }
 
 
@@ -42,15 +51,25 @@ public class TicketService {
         Ticket savedTicket = ticketRepository.save(ticket);
         return ticketMapper.toTicketResponse(savedTicket);
     }
-    @Transactional
-    public TicketResponse setInProgress(Long id){
-        Ticket ticket = ticketRepository.findById(id).orElseThrow(() -> new NotFoundException("Ticket not found"));
 
+    @Transactional
+    public TicketResponse setInProgress(Long id,Long agentId){
+        Ticket ticket = ticketRepository.findById(id).orElseThrow(() -> new NotFoundException("Ticket not found"));
+        User agent = userService.findByIdActiveTrue(agentId);
         if(!ticket.getStatus().equals(TicketStatus.OPEN)){
             throw new DomainException("Ticket is not open");
         }
+        ticket.setAgent(agent);
         ticket.setStatus(TicketStatus.IN_PROGRESS);
-        return ticketMapper.toTicketResponse(ticket);
+        TicketResponse response = ticketMapper.toTicketResponse(ticket);
+        if (ticket.getUser() != null) {
+            notificationService.create(new NotificationRequest(
+                    "Ticket in progress",
+                    "Your ticket is now in progress",
+                    ticket.getUser().getId()
+            ));
+        }
+        return response;
     }
     @Transactional
     public TicketResponse setClosedTicket(Long id){
@@ -59,7 +78,15 @@ public class TicketService {
             throw new DomainException("Ticket is not in progress");
         }
         ticket.setStatus(TicketStatus.CLOSED);
-        return ticketMapper.toTicketResponse(ticket);
+        TicketResponse response = ticketMapper.toTicketResponse(ticket);
+        if (ticket.getUser() != null) {
+            notificationService.create(new NotificationRequest(
+                    "Ticket closed",
+                    "Your ticket has been closed",
+                    ticket.getUser().getId()
+            ));
+        }
+        return response;
     }
 
 }

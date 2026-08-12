@@ -32,7 +32,9 @@ export default function LoginPage() {
     try {
       await login(email, password);
       const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname;
-      navigate(from && from !== "/login" ? from : "/dashboard", { replace: true });
+      const destination =
+        from && from !== "/login" && from !== "/" ? from : "/dashboard";
+      navigate(destination, { replace: true });
     } catch (err) {
       setError(getApiErrorMessage(err, "Não foi possível entrar. Verifique suas credenciais e tente novamente."));
       setLoading(false);

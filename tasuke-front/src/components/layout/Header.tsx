@@ -1,10 +1,10 @@
 import { useLocation } from "react-router-dom";
-import { BellIcon, MenuIcon, SearchIcon } from "lucide-react";
+import { MenuIcon, SearchIcon } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { UserMenu } from "@/components/layout/UserMenu";
+import { NotificationsMenu } from "@/components/layout/NotificationsMenu";
 import { useAuth } from "@/hooks/useAuth";
 import { initials } from "@/lib/format";
 
@@ -97,15 +97,7 @@ export function Header({ onMenuClick }: HeaderProps) {
 
         <StatusPill />
 
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative text-muted-foreground" aria-label="Notificações">
-              <BellIcon />
-              <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-tasuke-cyan shadow-[0_0_6px_rgba(0,229,255,0.8)]" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="bottom">Notificações</TooltipContent>
-        </Tooltip>
+        <NotificationsMenu />
 
         <UserMenu>
           <Button variant="ghost" className="h-8 gap-2 px-1.5">

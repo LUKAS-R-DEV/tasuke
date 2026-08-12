@@ -1,7 +1,9 @@
 spring:
   application:
     name: tasuke
-
+  threads:
+    virtual:
+      enabled: true
   # Configuração do Banco de Dados
   datasource:
     url: jdbc:postgresql://localhost:5432/tasuke

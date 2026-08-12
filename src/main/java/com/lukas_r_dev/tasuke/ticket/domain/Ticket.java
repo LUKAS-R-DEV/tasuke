@@ -24,6 +24,9 @@ public class Ticket {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "agent_id")
+    private User agent;
     private Instant createdAt;
     private Instant updatedAt;
 
@@ -39,8 +42,10 @@ public class Ticket {
         updatedAt = Instant.now();
     }
 
-
-
-
-
+    public Long getNotificationRecipientId(User currentUser){
+        if(this.user.getId().equals(currentUser.getId())){
+            return this.agent != null ? this.agent.getId() : null;
+        }
+        return this.user.getId();
+        }
 }

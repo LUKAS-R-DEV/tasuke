@@ -13,5 +13,6 @@ public interface TicketMapper {
     Ticket toTicket(TicketRequest ticketRequest);
 
     @Mapping(target = "userName", source = "user.name")
+    @Mapping(target = "agentName", source = "agent.name")
     TicketResponse toTicketResponse(Ticket ticket);
 }

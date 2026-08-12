@@ -4,6 +4,7 @@ import com.lukas_r_dev.tasuke.shared.response.ApiResponseError;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -15,6 +16,16 @@ import java.util.List;
 
 @RestControllerAdvice
 public class HandleException {
+    @ExceptionHandler(AuthenticationException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ApiResponseError authenticationException(AuthenticationException ex){
+        return ApiResponseError.builder()
+                .statusCode(HttpStatus.UNAUTHORIZED.value())
+                .message("Credenciais inválidas")
+                .timestamp(Instant.now())
+                .build();
+    }
+
     @ExceptionHandler(DomainException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiResponseError domainException(DomainException ex){
@@ -79,7 +90,7 @@ public class HandleException {
                 .timestamp(Instant.now())
                 .build();
    }
-   
+
    @ExceptionHandler(Exception.class)
    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiResponseError globalException(Exception ex){

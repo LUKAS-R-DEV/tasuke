@@ -228,14 +228,17 @@ src/main/java/com/lukas_r_dev/tasuke/
 ├── shared/
 │   ├── exceptions/        # Exceções + handler global
 │   └── response/          # Respostas padronizadas
+├── config/                # OpenAPI + DataSource (DATABASE_URL)
+├── service/               # CustomUserDetailsService
 ├── security/
-│   ├── config/            # Security + CORS
+│   ├── config/            # Security + CORS + AuthenticationEntryPoint
 │   ├── controller/        # /auth
 │   ├── dtos/              # LoginRequest / LoginResponse
 │   └── jwt/               # Filtro e serviço JWT
 ├── users/                 # Entidade, controller, dtos, mapper, repository, service
 ├── ticket/                # Ticket + enums Status/Priority + serviços
-└── comment/               # Comentários por ticket
+├── comment/               # Comentários por ticket
+└── notification/          # Notificações + anotação @Notify + aspect
 ```
 
 ### Estrutura do frontend
@@ -272,13 +275,59 @@ tasuke-front/src/
 
 ## 🐳 Docker
 
+### Aplicação completa (Postgres + backend + frontend)
+
+O `docker-compose.yaml` sobe o stack inteiro (o frontend usa nginx como proxy, servindo o app
+na porta 80 e encaminhando `/api` para o backend):
+
 ```bash
-# Sobe o PostgreSQL
-docker compose up -d
+docker compose up --build
+```
+
+- Frontend: `http://localhost`
+- Backend: `http://localhost:8080`
+
+### Apenas o PostgreSQL (desenvolvimento)
+
+```bash
+docker compose up -d postgres
 
 # Remove o container do banco (com dados)
 docker compose down -v
 ```
+
+---
+
+## 🚀 Deploy
+
+O backend aceita a variável `DATABASE_URL` (`postgresql://user:pass@host:port/db`) usada por
+plataformas como Render/Heroku — quando ausente, usa `spring.datasource.*`.
+
+### Variáveis de ambiente
+
+| Variável | Obrigatória | Descrição |
+|----------|-------------|-----------|
+| `DATABASE_URL` | no deploy | Connection string do Postgres (Render/Heroku) |
+| `SECURITY_JWT_SECRET` | recomendado | Segredo de assinatura do JWT (produção) |
+| `SPRING_DATASOURCE_URL` / `USERNAME` / `PASSWORD` | alternativa | Conexão JDBC explícita |
+
+### Render (free)
+
+O repositório inclui um blueprint `render.yaml` (Postgres + backend + frontend):
+
+1. Suba o repositório no GitHub.
+2. Render → **New → Blueprint** → selecione o repositório.
+3. Defina o secret `SECURITY_JWT_SECRET` no serviço `tasuke-backend`.
+
+O frontend usa `VITE_API_URL` (build-time) para apontar para a URL pública do backend. Em
+dev/local, o Vite faz proxy de `/api` para `localhost:8080`.
+
+### Health check
+
+Spring Boot Actuator expõe `GET /actuator/health` (liberado no Spring Security) para health checks.
+
+> **Primeiro usuário**: o banco começa vazio. Para logar, insira um usuário admin direto no
+> Postgres (com hash BCrypt de senha) ou use o endpoint `/users` com um token de admin existente.
 
 ---
 

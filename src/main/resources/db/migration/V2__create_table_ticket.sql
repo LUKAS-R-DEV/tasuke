@@ -5,8 +5,10 @@ create table ticket(
     status varchar(20) not null,
     priority varchar(20) not null,
     user_id bigint not null,
+    agent_id bigint,
     created_at timestamp not null,
     updated_at timestamp not null,
 
-    foreign key (user_id) references users(id)
+    foreign key (user_id) references users(id),
+    foreign key (agent_id) references users(id)
 );

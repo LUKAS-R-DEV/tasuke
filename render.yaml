@@ -1,0 +1,37 @@
+# Blueprint do Render — deploy do Tasuke (backend Spring Boot + frontend React + Postgres)
+# 1. Suba este repositório (GitHub) no Render.
+# 2. Blueprint > New Blueprint Instance, selecione o repo e confirme.
+# 3. Defina SECURITY_JWT_SECRET (secret) nas variáveis do backend.
+
+services:
+  # ---------- Backend (Spring Boot) ----------
+  - type: web
+    name: tasuke-backend
+    runtime: docker
+    plan: free
+    dockerfilePath: Dockerfile
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: tasuke-db
+          property: connectionString
+      - key: SECURITY_JWT_SECRET
+        sync: false
+
+  # ---------- Frontend (React/Vite) ----------
+  - type: web
+    name: tasuke-frontend
+    runtime: static
+    rootDir: tasuke-front
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      # URL pública do backend (gerada a partir do nome do serviço)
+      - key: VITE_API_URL
+        value: https://tasuke-backend.onrender.com
+
+# ---------- Banco de dados ----------
+databases:
+  - name: tasuke-db
+    plan: free
